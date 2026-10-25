@@ -17,6 +17,10 @@ All notable changes to `achery-specs` (the templates, rules, process docs and CL
 ### Changed
 - `check` report: per-spec ratios count manual criteria as covered and show `(N manual)`; the total line adds `(+N verified manually)`
 
+### Fixed
+- Release workflow: drops `setup-node`'s `registry-url`, whose placeholder token hid a failed trusted-publishing exchange behind a 404, and publishes with `--loglevel verbose` so the exchange's error is in the log
+- `package.json`: `bin` and `repository.url` in the form npm normalises to, so publishing no longer prints auto-correction warnings
+
 ---
 
 ## [1.0.0] - 2026-10-26

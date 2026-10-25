@@ -4,13 +4,13 @@
   "description": "Indexer and validator for Achery product specs: criterion IDs, cross-references and @spec test coverage.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/fwestling/achery-specs"
+    "url": "git+https://github.com/fwestling/achery-specs.git"
   },
   "homepage": "https://github.com/fwestling/achery-specs#readme",
   "license": "MIT",
   "type": "module",
   "bin": {
-    "achery-specs": "./dist/cli.js"
+    "achery-specs": "dist/cli.js"
   },
   "exports": {
     ".": {
