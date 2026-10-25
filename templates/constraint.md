@@ -9,7 +9,8 @@ prefix: <SHORTCAPS>         # short ALL-CAPS domain tag for criterion IDs
                             # another constraint spec if the numbering pool
                             # is genuinely one namespace.
 tags: []
-scope: []                   # slugs of capabilities/journeys this constraint applies to
+scope: []                   # slugs of capabilities/journeys this constraint applies to,
+                            # or [all] for the whole product
 kind: offline               # offline | sync | latency | data-residency | a11y | security | other
 ---
 

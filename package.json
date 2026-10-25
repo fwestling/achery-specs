@@ -1,0 +1,48 @@
+{
+  "name": "achery-specs",
+  "version": "1.0.0",
+  "description": "Indexer and validator for Achery product specs: criterion IDs, cross-references and @spec test coverage.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fwestling/achery-specs"
+  },
+  "homepage": "https://github.com/fwestling/achery-specs#readme",
+  "license": "UNLICENSED",
+  "type": "module",
+  "bin": {
+    "achery-specs": "./dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "templates",
+    "rules",
+    "process"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "tinyglobby": "^0.2.17",
+    "yaml": "^2.9.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.12"
+  },
+  "packageManager": "pnpm@10.11.0"
+}

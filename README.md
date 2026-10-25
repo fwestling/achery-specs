@@ -12,6 +12,8 @@ This repo distributes:
 - **Templates** for the three spec types (`templates/`)
 - **Rules** to drop into each project's `specs/CLAUDE.md` (`rules/`)
 - **Process** docs: backfill brief, dev workflow, interview script (`process/`)
+- **The `achery-specs` CLI** (npm), which indexes and validates a project's
+  `specs/` and builds a coverage map from `@spec` test tags (`src/`)
 
 ## The model
 
@@ -36,7 +38,92 @@ capability template. Read "consumer developer" wherever the template says
    vendors its own copies — accepted drift; see rationale below).
 4. Create `<project>/specs/capabilities/`, `<project>/specs/journeys/`,
    `<project>/specs/constraints/` as they become needed.
-5. Point agents at `specs/CLAUDE.md`; they'll do the rest.
+5. Add the CLI: `pnpm add -D achery-specs`, then a
+   `"spec:check": "achery-specs check"` script. Wire it into CI once every
+   `shipped` spec's criteria are tagged.
+6. Point agents at `specs/CLAUDE.md`; they'll do the rest.
+
+## The CLI
+
+```sh
+achery-specs check [--missing] [--json]  # validate + coverage; exit 1 on errors
+achery-specs write                       # regenerate every "Verified by" section
+achery-specs index [--out index.json]    # full index as JSON (for tooling, and v2)
+achery-specs next SYNC                   # next unused criterion ID for a prefix
+```
+
+Run from the project root (or pass `--root <dir>`). Exit codes: 0 clean (warnings
+allowed), 1 errors found, 2 usage or config error.
+
+### What it reads
+
+- Specs: `specs/capabilities/<area>/<slug>.md`, `specs/journeys/<slug>.md` and
+  `specs/constraints/<slug>.md`. Other markdown under `specs/` (`CLAUDE.md`,
+  gap lists, notes) is ignored.
+- Template shape: the project's own `specs/.templates/*.md` when present (a
+  project's specs follow the templates they were written against), otherwise
+  the copies bundled with the package. Required frontmatter keys and `##`
+  sections come from the template.
+- Tags: `@spec` directly after a comment opener (`//`, `#`, `/*`, `{/*`, `--`)
+  in test files. Default globs cover `*.test.*`/`*.spec.*` (TS/JS),
+  `*_test.{gd,py,go}` and `test_*.py`, skipping `node_modules`, `dist`, `build`,
+  `coverage`, dot-directories and `specs/`.
+
+### Configuration
+
+Optional `specs/achery-specs.json`:
+
+```json
+{
+  "tests": ["apps/**/*.test.{ts,tsx}", "packages/godot-addon/tests/*_test.gd"],
+  "ignore": ["apps/legacy/**"]
+}
+```
+
+`tests` replaces the default globs; `ignore` adds to the default ignores.
+
+### Checks
+
+Errors (fail `check`):
+
+| Code | Meaning |
+| --- | --- |
+| `frontmatter` | Missing, unterminated or invalid YAML frontmatter |
+| `layout` | Spec at the wrong depth (capabilities need an area directory; journeys and constraints are flat) |
+| `missing-field` | A frontmatter key from the template is absent |
+| `id-mismatch`, `invalid-slug`, `duplicate-slug` | `id` must be kebab-case, equal the filename, and be unique |
+| `missing-title`, `invalid-status`, `invalid-kind`, `invalid-prefix` | Frontmatter values outside the format |
+| `missing-since` | `shipped` without a real `since` version |
+| `missing-section`, `unknown-section`, `duplicate-section`, `section-order` | `##` sections must match the template (Marketing copy is optional and may be called Documentation copy) |
+| `stray-criterion` | A bold criterion ID that isn't a `- **ID** — …` list item |
+| `misplaced-criterion` | A criterion defined outside Acceptance/Success criteria |
+| `prefix-mismatch` | A criterion that doesn't use its spec's `prefix:` |
+| `duplicate-criterion` | The same ID defined twice (prefix pools are project-wide) |
+| `unknown-slug`, `wrong-slug-type` | `related`/`supersedes`/`capabilities`/`scope` naming a missing spec, or the wrong type (`capabilities` takes capabilities; `scope` takes capabilities, journeys or `all`) |
+| `undefined-ref` | A reference to an undefined criterion: always when backticked or in a `refs:` list, otherwise only when the prefix is a real one (so "UTF-8" is fine) |
+| `malformed-tag`, `unresolved-tag`, `tag-slug-mismatch` | A `@spec` tag that doesn't parse, doesn't resolve, or names the wrong spec |
+| `untested-shipped` | A `shipped` spec with a live criterion no test tags |
+| `stale-verified` | A "Verified by" section that doesn't match the tags (run `write`) |
+
+Warnings (reported, don't fail): `unknown-field`, `no-criteria`,
+`deprecated-ref` and `deprecated-tag` (a reference or tag pointing at a struck-through
+criterion, or one in a `deprecated` spec).
+
+HTML comments and fenced code are ignored when finding criteria and references,
+so template guidance, `KNOWN GAP` notes and examples never trip a check.
+
+Deprecated criteria (`- ~~**SYNC-7**~~ (deprecated: …)`) keep their ID in the
+numbering pool, but don't count towards coverage and need no tests.
+
+### Library
+
+The same index is available programmatically, for v2's `<SpecBrowser />` and
+other tooling:
+
+```ts
+import { buildIndex } from 'achery-specs'
+const index = buildIndex({ root: process.cwd() }) // specs, criteria, tags, coverage, problems
+```
 
 ## Why per-project template copies
 
@@ -48,14 +135,11 @@ changes, we update projects deliberately.
 
 ## Roadmap
 
-- **v0 (this)** — templates, rules, process docs. Markdown only.
-- **v1** — indexer/validator CLI: parse specs, cross-check criterion references,
-  build coverage map from `// @spec` markers.
+- **v0** — templates, rules, process docs. Markdown only.
+- **v1 (this)** — indexer/validator CLI: parse specs, cross-check criterion
+  references, build a coverage map from `@spec` markers, generate "Verified by".
 - **v2** — React `<SpecBrowser />` component (achery-ui styled) that any
-  project can embed to render its own specs + coverage.
-
-v1 lands after we've applied v0 to at least one project (Mandrel) and
-confirmed the format survives contact with reality.
+  project can embed to render its own specs + coverage, from `achery-specs index`.
 
 ## Repo layout
 
@@ -72,4 +156,21 @@ achery-specs/
     backfill-agent.md      # brief for the backfill agent
     interview.md           # question script for Phase 3 of backfill
     workflow.md            # how spec authorship interleaves with dev
+  src/                     # the achery-specs CLI and library
+  test/
 ```
+
+## Developing the CLI
+
+```sh
+pnpm install
+pnpm test        # vitest
+pnpm typecheck
+pnpm build       # → dist/
+node dist/cli.js check --root ../mandrel
+```
+
+Releases follow the achery-workshop pattern: bump `package.json`, promote
+`[Unreleased]` in `CHANGELOG.md`, merge, then tag `v{version}` and push the tag.
+`.github/workflows/release.yml` publishes to npm (needs the `NPM_TOKEN` secret)
+and creates the GitHub Release.

@@ -92,6 +92,7 @@ target consumer-developer readers.
 ## Verified by
 
 <!--
-Populated by the coverage indexer once tooling ships (achery-specs v1).
+Generated from `@spec` test tags by `achery-specs write`, which replaces
+this whole section; `achery-specs check` fails when it's out of date.
 Do not hand-edit.
 -->

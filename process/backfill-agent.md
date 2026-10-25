@@ -77,10 +77,13 @@ missing one, add it to the queue.
 
 ## Phase 5 — Test backfill (optional)
 
-For existing tests that clearly map to a specific criterion:
+For existing tests that clearly map to a specific criterion
+(`achery-specs check --missing` lists the untested ones per spec):
 
 - Propose adding `// @spec <prefix>-N` above the test.
 - Present as a diff. Do NOT apply without approval.
+- Once applied, run `achery-specs write` to fill in each spec's
+  "Verified by" section, then `achery-specs check`.
 
 If a test doesn't map cleanly, leave it. Not every test is tied to a
 capability, and forcing tags creates noise that undermines the whole

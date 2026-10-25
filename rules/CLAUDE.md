@@ -64,8 +64,10 @@ namespaces its criterion IDs (e.g. `SYNC`, `EDIT`, `OFFLINE`).
 - **Prefixes may be shared across multiple specs.** All specs sharing a
   prefix draw from the same numbering pool. Two sync capabilities using
   `SYNC` cannot both have `SYNC-1`.
-- To find the next available number for a prefix: grep the specs
-  directory for `<prefix>-` and take max + 1.
+- To find the next available number for a prefix, run
+  `pnpm exec achery-specs next <PREFIX>` (max + 1, deprecated IDs
+  included). Without the CLI: grep `specs/` for `<prefix>-` and take
+  max + 1.
 - Never reuse or renumber. Dropped criteria are marked in place; new ones
   take the next available number project-wide within the prefix.
 - Each criterion must be individually testable. If it isn't, split it.
@@ -99,6 +101,25 @@ Rules:
   tied to a spec, and noise undermines coverage.
 - Provenance-qualified form is allowed but not required:
   `// @spec sync-mirror/SYNC-42`. The bare form is canonical.
+- Use the language's line comment: `// @spec` (TS/JS), `# @spec`
+  (GDScript, Python), `-- @spec` (SQL). `/* @spec … */` and JSX
+  `{/* @spec … */}` work too. Nothing but IDs after the tag.
+
+## Checking
+
+The `achery-specs` CLI (a devDependency, usually behind `pnpm spec:check`)
+validates `specs/` and the tags:
+
+- `achery-specs check` — fails on broken IDs, references, tags, frontmatter
+  and sections, and on `shipped` specs with untested criteria.
+  `--missing` lists what's untested.
+- `achery-specs write` — regenerates every "Verified by" section from the
+  tags. Run it after adding, moving or removing tagged tests; `check`
+  fails when a section is stale.
+- `achery-specs next <PREFIX>` — the next criterion ID for a prefix.
+
+Run `check` before handing work over. Don't work around a failure by
+loosening a spec or removing a tag; fix the cause or raise it.
 
 ## Conflicts
 

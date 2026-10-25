@@ -1,0 +1,8 @@
+export { buildIndex, coverageMap, type BuildOptions } from './indexer.js'
+export { loadConfig, CONFIG_FILE, DEFAULT_IGNORE, DEFAULT_TESTS, SPECS_DIR } from './config.js'
+export { parseSpec, parseFrontmatter, parseSections } from './parse.js'
+export { scanTags } from './tags.js'
+export { formatReport } from './report.js'
+export { renderVerified } from './verified.js'
+export { nextId, writeVerified } from './write.js'
+export * from './types.js'
