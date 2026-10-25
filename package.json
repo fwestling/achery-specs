@@ -7,7 +7,7 @@
     "url": "https://github.com/fwestling/achery-specs"
   },
   "homepage": "https://github.com/fwestling/achery-specs#readme",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "type": "module",
   "bin": {
     "achery-specs": "./dist/cli.js"

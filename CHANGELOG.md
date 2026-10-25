@@ -15,6 +15,7 @@ All notable changes to `achery-specs` (the templates, rules, process docs and CL
 - CLI `achery-specs next <PREFIX>`: next unused criterion ID in a prefix pool
 - Optional `specs/achery-specs.json` for test globs and ignores
 - Library export `buildIndex` and friends
+- MIT licence
 - Tags in `#`, `/* */`, JSX `{/* */}` and `--` comments, as well as `//`
 
 ### Changed
