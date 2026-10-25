@@ -14,20 +14,23 @@ export const formatReport = (index: SpecIndex, { missing = false }: { missing?: 
     .sort((a, b) => a.path.localeCompare(b.path))
     .map((spec) => {
       const live = spec.criteria.filter((criterion) => !criterion.deprecated)
-      const untested = live.filter((criterion) => !tested.has(criterion.id)).map((criterion) => criterion.id)
-      return { spec, ratio: `${live.length - untested.length}/${live.length}`, untested }
+      const manual = live.filter((criterion) => !tested.has(criterion.id) && criterion.manual !== null).length
+      const untested = live.filter((criterion) => !tested.has(criterion.id) && criterion.manual === null).map((criterion) => criterion.id)
+      const ratio = `${live.length - untested.length}/${live.length}${manual > 0 ? ` (${manual} manual)` : ''}`
+      return { spec, ratio, untested }
     })
 
   const width = Math.max(0, ...rows.map((row) => row.spec.path.length))
   const ratioWidth = Math.max(0, ...rows.map((row) => row.ratio.length))
-  const lines = ['Spec coverage (live criteria with at least one @spec-tagged test)', '']
+  const lines = ['Spec coverage (live criteria with at least one @spec-tagged test, or verified manually)', '']
   for (const { spec, ratio, untested } of rows) {
     lines.push(`${spec.path.padEnd(width)}  ${ratio.padStart(ratioWidth)}  ${spec.status}`)
     if (missing && untested.length > 0) lines.push(`${''.padEnd(width)}  untested: ${untested.join(', ')}`)
   }
 
   const { summary } = index
-  lines.push('', `Total: ${summary.covered}/${summary.live} live criteria tested, ${summary.tags} tags in ${summary.testFiles} test files`)
+  const manualNote = summary.manual > 0 ? ` (+${summary.manual} verified manually)` : ''
+  lines.push('', `Total: ${summary.covered}/${summary.live} live criteria tested${manualNote}, ${summary.tags} tags in ${summary.testFiles} test files`)
 
   const errors = index.problems.filter((problem) => problem.severity === 'error')
   const warnings = index.problems.filter((problem) => problem.severity === 'warning')

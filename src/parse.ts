@@ -14,6 +14,9 @@ const DEFINITION = new RegExp(`^\\s*(?:[-*]|\\d+\\.)\\s+(~~)?(\\*\\*)?(~~)?(${ID
 const BOLD_ID = new RegExp(`\\*\\*(?:~~)?(${ID})(?:~~)?\\*\\*`, 'g')
 const ANY_ID = new RegExp(`(?<![A-Za-z0-9-])(${ID})(?![A-Za-z0-9])`, 'g')
 const FENCE = /^\s*(```|~~~)/
+/** A trailing `_(manual: <method>)_` on a criterion: verified by hand, not by a test. */
+const MANUAL = /\s*_\(manual:\s*(.*?)\s*\)_\s*$/
+const MANUAL_ANYWHERE = /_\(manual\b/
 
 /**
  * The body's lines with fenced code and HTML comments blanked out (line count kept),
@@ -123,11 +126,24 @@ export const parseSpec = (path: string, text: string, type: SpecType, area: stri
     if (definition && (bold || struck) && !(definition[2] !== undefined && definition[6] === undefined)) {
       const criterionId = definition[4]!
       definedAt = text.indexOf(criterionId)
+      let statement = definition[8]!
+      const manual = MANUAL.exec(statement)
+      if (manual) statement = statement.slice(0, manual.index)
+      if ((manual && manual[1] === '') || (!manual && MANUAL_ANYWHERE.test(statement))) {
+        problems.push({
+          severity: 'error',
+          code: 'malformed-manual',
+          message: `${criterionId}: a manual marker must end the line and name the method, e.g. "_(manual: spec review)_"`,
+          file: path,
+          line,
+        })
+      }
       criteria.push({
         id: criterionId,
         ...splitId(criterionId),
-        text: definition[8]!.replace(/~~/g, '').replace(/^\s*(—|–|-|:)\s*/, '').trim(),
+        text: statement.replace(/~~/g, '').replace(/^\s*(—|–|-|:)\s*/, '').trim(),
         deprecated: struck,
+        manual: manual?.[1] ? manual[1] : null,
         spec: id,
         file: path,
         line,

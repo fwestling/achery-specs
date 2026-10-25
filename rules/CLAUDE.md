@@ -105,13 +105,36 @@ Rules:
   (GDScript, Python), `-- @spec` (SQL). `/* @spec … */` and JSX
   `{/* @spec … */}` work too. Nothing but IDs after the tag.
 
+## Criteria no test can check
+
+A few criteria are verified by people, not tests: a process rule ("a new
+exception needs a stated reason"), a list of accepted exceptions, a
+behaviour that only shows on a real device. Mark those at the end of the
+criterion line with the method:
+
+```markdown
+- **PARITY-6** — A new exception needs a stated reason… _(manual: spec review)_
+- **LARGE-8** — Crossing the breakpoint never loses unsaved content. _(manual: on-device check each release)_
+```
+
+- A marked criterion counts as covered without a tag; "Verified by" shows
+  `manual: <method>` instead of test files.
+- The method says who checks it and when. `_(manual: )_` with no method, or
+  a marker that isn't at the end of the line, fails `check`.
+- Use it sparingly. Anything a unit, integration or UI test can check gets a
+  test, including UI behaviour. The marker is never a way to ship untested
+  code.
+- If a test later covers the criterion, tag it; the tag takes precedence,
+  and the marker can be dropped.
+
 ## Checking
 
 The `achery-specs` CLI (a devDependency, usually behind `pnpm spec:check`)
 validates `specs/` and the tags:
 
 - `achery-specs check` — fails on broken IDs, references, tags, frontmatter
-  and sections, and on `shipped` specs with untested criteria.
+  and sections, and on `shipped` specs with criteria that have neither a
+  test nor a manual marker.
   `--missing` lists what's untested.
 - `achery-specs write` — regenerates every "Verified by" section from the
   tags. Run it after adding, moving or removing tagged tests; `check`

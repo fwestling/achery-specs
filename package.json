@@ -1,6 +1,6 @@
 {
   "name": "achery-specs",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Indexer and validator for Achery product specs: criterion IDs, cross-references and @spec test coverage.",
   "repository": {
     "type": "git",

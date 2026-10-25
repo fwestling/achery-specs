@@ -42,6 +42,11 @@ export interface Criterion extends Location {
   text: string
   /** Struck through in place (`~~**SYNC-7**~~`): never reused, never tested. */
   deprecated: boolean
+  /**
+   * How the criterion is verified when no test can check it, from a trailing
+   * `_(manual: <method>)_` marker (e.g. "spec review"). Null when absent.
+   */
+  manual: string | null
   /** Slug of the spec that defines it. */
   spec: string
 }
@@ -118,6 +123,8 @@ export interface CriterionCoverage {
   id: string
   spec: string
   deprecated: boolean
+  /** The criterion's manual-verification method, if marked (see `Criterion.manual`). */
+  manual: string | null
   tests: Location[]
 }
 
@@ -128,6 +135,8 @@ export interface Summary {
   live: number
   /** Live criteria with at least one tagged test. */
   covered: number
+  /** Live criteria with no tagged test but a `_(manual: …)_` marker. */
+  manual: number
   testFiles: number
   tags: number
   errors: number

@@ -102,7 +102,8 @@ Errors (fail `check`):
 | `unknown-slug`, `wrong-slug-type` | `related`/`supersedes`/`capabilities`/`scope` naming a missing spec, or the wrong type (`capabilities` takes capabilities; `scope` takes capabilities, journeys or `all`) |
 | `undefined-ref` | A reference to an undefined criterion: always when backticked or in a `refs:` list, otherwise only when the prefix is a real one (so "UTF-8" is fine) |
 | `malformed-tag`, `unresolved-tag`, `tag-slug-mismatch` | A `@spec` tag that doesn't parse, doesn't resolve, or names the wrong spec |
-| `untested-shipped` | A `shipped` spec with a live criterion no test tags |
+| `untested-shipped` | A `shipped` spec with a live criterion that no test tags and no manual marker covers |
+| `malformed-manual` | A `_(manual: …)_` marker with no method, or not at the end of the criterion line |
 | `stale-verified` | A "Verified by" section that doesn't match the tags (run `write`) |
 
 Warnings (reported, don't fail): `unknown-field`, `no-criteria`,
@@ -111,6 +112,13 @@ criterion, or one in a `deprecated` spec).
 
 HTML comments and fenced code are ignored when finding criteria and references,
 so template guidance, `KNOWN GAP` notes and examples never trip a check.
+
+A criterion no test can check (a process rule, an on-device check) ends with
+`_(manual: <method>)_`, e.g. `- **PARITY-6** — … _(manual: spec review)_`. It
+counts as covered without a tag, and "Verified by" lists `manual: <method>`
+for it, so a hand check never reads as a test. A tag takes precedence over
+the marker. The report counts these separately ("+N verified manually"), and
+the index carries them as `coverage[].manual` and `summary.manual`.
 
 Deprecated criteria (`- ~~**SYNC-7**~~ (deprecated: …)`) keep their ID in the
 numbering pool, but don't count towards coverage and need no tests.

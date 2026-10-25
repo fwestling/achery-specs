@@ -44,6 +44,9 @@ Numbering rules:
   a `~~SYNC-7~~ (deprecated: <reason>)` line; the next new ID is still one
   higher than the current max.
 - Each criterion should be individually testable. If it isn't, split it.
+  Only when no test can check it (a process rule, an on-device check), end
+  the line with `_(manual: <method>)_`; see "Criteria no test can check" in
+  specs/CLAUDE.md.
 - Prefer active, concrete verbs. "Shows", "returns", "persists" beat
   "handles", "supports".
 

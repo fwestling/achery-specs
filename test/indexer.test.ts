@@ -161,6 +161,36 @@ describe('buildIndex catches', () => {
   })
 })
 
+describe('manual verification', () => {
+  const manualFiles = () => ({
+    'specs/capabilities/sync/queue.md': capability({ id: 'queue', prefix: 'SYNC', criteria: ['**SYNC-3** — queues', '**SYNC-4** — reviewed _(manual: spec review)_', '**SYNC-5** — both _(manual: device check)_'] }),
+    'apps/web/queue.test.ts': '// @spec SYNC-5\n',
+  })
+
+  test('a manual marker satisfies a shipped spec without a test', () => {
+    const index = buildIndex({ root: validProject(manualFiles()) })
+    expect(index.problems).toEqual([])
+    expect(index.coverage.find((c) => c.id === 'SYNC-4')).toMatchObject({ manual: 'spec review', tests: [] })
+    // SYNC-5 is tested, so it counts as tested rather than manual
+    expect(index.summary).toMatchObject({ live: 6, covered: 5, manual: 1 })
+  })
+
+  test('a shipped spec still fails on a criterion with neither a test nor a marker', () => {
+    const root = validProject({
+      'specs/capabilities/sync/queue.md': capability({ id: 'queue', prefix: 'SYNC', criteria: ['**SYNC-3** — queues', '**SYNC-4** — nothing'] }),
+    })
+    const problem = buildIndex({ root }).problems.find((p) => p.code === 'untested-shipped')
+    expect(problem?.message).toBe('status shipped but untested: SYNC-4')
+  })
+
+  test('Verified by shows the manual method only where no test tags the criterion', () => {
+    const root = validProject(manualFiles())
+    const text = readFileSync(join(root, 'specs/capabilities/sync/queue.md'), 'utf8')
+    expect(text).toContain('- **SYNC-4** — manual: spec review\n')
+    expect(text).toContain('- **SYNC-5** — `apps/web/queue.test.ts`\n')
+  })
+})
+
 describe('writeVerified', () => {
   test('lists each live criterion with its test files, and is idempotent', () => {
     const root = makeProject(validFiles())

@@ -103,6 +103,29 @@ describe('parseSpec', () => {
     expect(spec!.refs.map((r) => [r.id, r.line])).toEqual([['THING-3', 35]])
   })
 
+  test('reads a trailing manual marker as the verification method and strips it from the text', () => {
+    const { spec, problems } = parse(
+      capability({ id: 'thing', prefix: 'THING', criteria: ['**THING-1** — reviewed _(manual: spec review)_', '**THING-2** — tested', '**THING-3** — on device _(manual:  each release )_  '] }),
+    )
+    expect(problems).toEqual([])
+    expect(spec!.criteria.map((c) => [c.id, c.text, c.manual])).toEqual([
+      ['THING-1', 'reviewed', 'spec review'],
+      ['THING-2', 'tested', null],
+      ['THING-3', 'on device', 'each release'],
+    ])
+  })
+
+  test('flags a manual marker with no method, or one that does not end the line', () => {
+    const { spec, problems } = parse(
+      capability({ id: 'thing', prefix: 'THING', criteria: ['**THING-1** — empty _(manual: )_', '**THING-2** — _(manual: review)_ then more text'] }),
+    )
+    expect(problems.map((p) => [p.code, p.line])).toEqual([
+      ['malformed-manual', 22],
+      ['malformed-manual', 23],
+    ])
+    expect(spec!.criteria.map((c) => c.manual)).toEqual([null, null])
+  })
+
   test('returns a frontmatter problem instead of a spec when the YAML is broken', () => {
     const { spec, problems } = parse('---\nid: [\n---\n')
     expect(spec).toBeNull()

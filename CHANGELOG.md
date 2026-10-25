@@ -6,6 +6,19 @@ All notable changes to `achery-specs` (the templates, rules, process docs and CL
 
 ---
 
+## [1.1.0] - 2026-10-26
+
+### Added
+- Manual verification: a criterion ending in `_(manual: <method>)_` counts as covered without a `@spec` tag, for criteria no test can check (process rules, on-device checks). "Verified by" shows `manual: <method>`; a tag takes precedence
+- `check`: `malformed-manual` error for a marker with no method or not at the end of the line
+- Index: `coverage[].manual` and `summary.manual` (live criteria verified only by hand); additive, so `schemaVersion` stays 1
+- rules: "Criteria no test can check" section; templates mention the marker
+
+### Changed
+- `check` report: per-spec ratios count manual criteria as covered and show `(N manual)`; the total line adds `(+N verified manually)`
+
+---
+
 ## [1.0.0] - 2026-10-26
 
 ### Added
@@ -34,5 +47,6 @@ All notable changes to `achery-specs` (the templates, rules, process docs and CL
 ### Added
 - Templates, rules and process docs (markdown only)
 
-[Unreleased]: https://github.com/fwestling/achery-specs/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/fwestling/achery-specs/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/fwestling/achery-specs/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/fwestling/achery-specs/releases/tag/v1.0.0

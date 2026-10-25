@@ -222,9 +222,10 @@ export const buildIndex = ({ root }: BuildOptions): SpecIndex => {
     coverage.set(tag.id, [...(coverage.get(tag.id) ?? []), { file: tag.file, line: tag.line }])
   }
 
-  // Shipped means every live criterion has a test; Verified by mirrors the tags
+  // Shipped means every live criterion has a test, or is marked as verified by hand;
+  // Verified by mirrors the tags and the manual markers
   for (const spec of specs) {
-    const untested = spec.criteria.filter((criterion) => !criterion.deprecated && !coverage.has(criterion.id))
+    const untested = spec.criteria.filter((criterion) => !criterion.deprecated && !coverage.has(criterion.id) && criterion.manual === null)
     if (spec.status === 'shipped' && untested.length > 0) {
       problems.push(error('untested-shipped', `status shipped but untested: ${untested.map((c) => c.id).join(', ')}`, { file: spec.path, line: 1 }))
     }
@@ -240,6 +241,7 @@ export const buildIndex = ({ root }: BuildOptions): SpecIndex => {
     id: criterion.id,
     spec: criterion.spec,
     deprecated: isRetired(criterion),
+    manual: criterion.manual,
     tests: coverage.get(criterion.id) ?? [],
   }))
   const live = coverageList.filter((entry) => !entry.deprecated)
@@ -256,6 +258,7 @@ export const buildIndex = ({ root }: BuildOptions): SpecIndex => {
       criteria: coverageList.length,
       live: live.length,
       covered: live.filter((entry) => entry.tests.length > 0).length,
+      manual: live.filter((entry) => entry.tests.length === 0 && entry.manual !== null).length,
       testFiles: testFiles.length,
       tags: tags.length,
       errors: problems.filter((problem) => problem.severity === 'error').length,

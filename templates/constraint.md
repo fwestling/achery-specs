@@ -39,7 +39,9 @@ qualifiers ("reasonable", "good", "modern").
 <!--
 Testable bullets. Same rules as capability criteria: stable IDs using the
 frontmatter `prefix:`, never reused, unique across specs sharing the
-prefix. Reference from tests via `// @spec <prefix>-N`.
+prefix. Reference from tests via `// @spec <prefix>-N`. A criterion only a
+person can verify (a review rule, an audit) ends with
+`_(manual: <method>)_`.
 -->
 
 - **<prefix>-N** — <testable statement of the constraint>
