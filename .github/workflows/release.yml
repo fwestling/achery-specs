@@ -24,7 +24,8 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
-          registry-url: 'https://registry.npmjs.org'
+          # No registry-url: it writes a placeholder auth token, which npm falls back to (as a misleading
+          # 404) when the OIDC exchange fails. Without it a failed exchange is a clear ENEEDAUTH.
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -54,7 +55,8 @@ jobs:
           if npm view "achery-specs@$VERSION" version >/dev/null 2>&1; then
             echo "achery-specs@$VERSION is already on npm; skipping publish"
           else
-            npm publish --access public
+            # verbose: npm logs why an OIDC token exchange failed only at this level
+            npm publish --access public --loglevel verbose
           fi
 
       - name: Create GitHub Release
