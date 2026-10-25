@@ -83,6 +83,7 @@ status: shipped
 since: 0.1.0
 prefix: ${prefix}
 tags: []
+related: []
 capabilities: [${capabilities.join(', ')}]
 ---
 
@@ -118,6 +119,7 @@ status: shipped
 since: 0.1.0
 prefix: ${prefix}
 tags: []
+related: []
 scope: [${scope.join(', ')}]
 kind: ${kind}
 ---

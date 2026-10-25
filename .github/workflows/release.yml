@@ -12,6 +12,8 @@ jobs:
     environment: release
     permissions:
       contents: write
+      # npm trusted publishing (OIDC): no npm token in the repo
+      id-token: write
 
     steps:
       - uses: actions/checkout@v4
@@ -42,10 +44,18 @@ jobs:
           pnpm test
           pnpm build
 
+      # Trusted publishing needs npm >= 11.5.1; npm runs the OIDC exchange, so publish with npm, not pnpm
+      - name: Update npm
+        run: npm install -g npm@11
+
       - name: Publish to npm
-        run: pnpm publish --no-git-checks --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          VERSION="${{ steps.pkg.outputs.version }}"
+          if npm view "achery-specs@$VERSION" version >/dev/null 2>&1; then
+            echo "achery-specs@$VERSION is already on npm; skipping publish"
+          else
+            npm publish --access public
+          fi
 
       - name: Create GitHub Release
         env:

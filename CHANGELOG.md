@@ -19,6 +19,7 @@ All notable changes to `achery-specs` (the templates, rules, process docs and CL
 
 ### Changed
 - rules: next-ID lookup uses `achery-specs next`; new "Checking" section
+- templates: journeys and constraints gain `related:` (a journey or constraint can now point at a constraint without misusing `capabilities`/`scope`)
 - templates: capability "Verified by" comment describes `achery-specs write`; constraint `scope` documents `[all]`
 - process: Phase 5 of the backfill uses `check --missing` and `write`
 

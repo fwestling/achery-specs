@@ -172,5 +172,6 @@ node dist/cli.js check --root ../mandrel
 
 Releases follow the achery-workshop pattern: bump `package.json`, promote
 `[Unreleased]` in `CHANGELOG.md`, merge, then tag `v{version}` and push the tag.
-`.github/workflows/release.yml` publishes to npm (needs the `NPM_TOKEN` secret)
-and creates the GitHub Release.
+`.github/workflows/release.yml` publishes to npm through npm trusted publishing
+(OIDC, no token; configured on the package's npmjs.com settings) and creates the
+GitHub Release. It skips the publish if that version is already on npm.

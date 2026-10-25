@@ -8,6 +8,7 @@ prefix: <SHORTCAPS>         # short ALL-CAPS domain tag for step + success IDs
                             # journey; may be shared if two journeys really
                             # do share a numbering namespace.
 tags: []
+related: []                 # slugs of related capabilities/journeys/constraints
 capabilities: []            # slugs of capabilities composed by this journey
 ---
 
